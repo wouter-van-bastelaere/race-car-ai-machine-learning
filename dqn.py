@@ -81,12 +81,9 @@ class DQN_solver:
     def choose_action(self, state, epsilon):
         epsilon = 1
         if np.random.random() < epsilon:
-            print('random')
             action = (random.choice([True, False]), random.choice([True, False]))
-            print(action)
             return action
         else:
-            print('niet random')
             with torch.no_grad():
                 return torch.argmax(self.dqn(state)).numpy()
     
@@ -121,22 +118,23 @@ class DQN_solver:
         scores = deque(maxlen=100)
     
         for e in range(self.n_episodes):
-            print(auto1)
-            state = self.preprocess_state(auto1.State())
-            print(f"state is {state}")
+            #print(auto)
+            auto = Car()
+            state = self.preprocess_state(auto.State())
+            #print(f"state is {state}")
             done = False
             i = 0
             while not done:
                 if e%100 == 0 and not self.quiet:
                     pass #render
                 action = self.choose_action(state, self.get_epsilon(e))
-                print(f"action is {action}")
                 #next_state, reward, done, _ = _ #self.env.step(action)
-                next_state, reward, done = auto1.Next_state(action), auto1.Reward(), auto1.Done()
+                next_state, reward, done = auto.Next_state(action), auto.Reward(), auto.Done()
                 next_state = self.preprocess_state(next_state)
                 self.remember(state, action, reward, next_state, done)
                 state = next_state
                 i += 1
+            print(i)
             scores.append(i)
         mean_score = np.mean(scores)
 
