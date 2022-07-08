@@ -50,7 +50,7 @@ class track:
         return m.sqrt((start[0]-x)**2 + (start[1]-y)**2)
 
 a = track()
-a.read_track(f"C:\\Users\\woute\\Documents\\wiskunde\\raceai_py\\track2.txt")
+a.read_track("track2.txt")
 #print(a.matrix)
 
 print(a.get_distance_to_zero((0.43, 0), m.pi/3, 0.1))
