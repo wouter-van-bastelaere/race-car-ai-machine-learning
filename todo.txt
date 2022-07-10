@@ -1,0 +1,15 @@
+visualisatie:
+    0) visualisatie deftig
+    1) meerdere auto's tegelijk
+    2) zoom
+    3) ergens kunnen opslaan
+    4) race opslaan en dan afspelen
+
+tracks:
+    1) hoe rewards bijhouden
+    2) collisie detectie
+
+ai:
+    1) a+b trainen
+    2) ai die x en y kan bijsturen
+    3) ai die steer en speed kan bijsturen
