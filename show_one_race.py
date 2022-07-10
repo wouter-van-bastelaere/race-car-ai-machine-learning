@@ -11,6 +11,10 @@ MAX_ITT = 10000
 START_X = 3
 START_Y = 3
 
+def get_steer_parameters():
+    return (1e-2, 1e-2, 1e-2, 1e-1)
+
+
 def show_one_race():
     car = Car()
     env = track()
@@ -20,6 +24,7 @@ def show_one_race():
     max_itt = MAX_ITT
     itt = 0
 
+    Left, Right, Up, Down = get_steer_parameters()
 
     race_car = image(racecar_picture)
     car.x = START_X
@@ -45,13 +50,13 @@ def show_one_race():
             user_key = [0,0,0,0]
             for event in (pygame.event.get()):
                 if pygame.key.get_pressed()[pygame.K_LEFT]:
-                    user_key[0] += 1e-2
+                    user_key[0] += Left
                 if pygame.key.get_pressed()[pygame.K_RIGHT]:
-                    user_key[1] += 1e-2
+                    user_key[1] += Right
                 if pygame.key.get_pressed()[pygame.K_UP]:
-                    user_key[2] += 1e-2
+                    user_key[2] += Up
                 if pygame.key.get_pressed()[pygame.K_DOWN]:
-                    user_key[3] += 1e-1
+                    user_key[3] += Down
                 if event.type == pygame.QUIT:
                     pygame.quit()
             car.Steer_user(user_key[2]-user_key[3], user_key[0]-user_key[1])

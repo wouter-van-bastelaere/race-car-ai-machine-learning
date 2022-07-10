@@ -8,6 +8,12 @@ max_kracht = 100
 max_draai = 0.2
 max_torque = 100
 
+def get_steer_parameters():
+    return (1e-2, 1e-2, 1e-2, 1e-1)
+
+Left, Right, Up, Down = get_steer_parameters()
+
+
 class Car:#//cars are circles to make collision easy.
     def __init__(self, x=200, y=-200, rot=0, momentum=0, ang_momentum=0, size=1):
         self.x, self.y, self.rot, self.momentum, self.ang_momentum, self.size = x, y, rot, momentum, ang_momentum, size
@@ -54,7 +60,7 @@ class Car:#//cars are circles to make collision easy.
         return self.State()
 
     def Reward(self):
-        return (self.x-200)**2 + (self.y+200)**2
+        return 1/((self.x-300)**2 + (self.y+300)**2)
 
     def Done(self):
         return not ((-50 < self.x < 400) and (-400 < self.y < 50))
@@ -71,8 +77,17 @@ class Car:#//cars are circles to make collision easy.
         else:
             self.draai += draai
 
+
+
     def Steer_ai(self, action):
-        kracht, draai = action #Get from AI
+        if action == 0:
+            kracht, draai = Up, 0
+        if action == 1:
+            kracht, draai = Down, 0
+        if action == 2:
+            kracht, draai = 0, Left
+        if action == 3:
+            kracht, draai = 0, Right
         self.momentum += kracht
         if draai == 0:
             self.draai = 0

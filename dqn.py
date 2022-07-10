@@ -9,6 +9,8 @@ from collections import deque
 
 from car import Car
 
+import matplotlib.pyplot as plt
+
 auto1 = Car()
 repr(auto1)
 
@@ -20,12 +22,14 @@ class DQN(nn.Module):
         self.fc1 = nn.Linear(8, 30)
         self.fc2 = nn.Linear(30, 50)
         self.fc3 = nn.Linear(50, 4)
+        #self.layer = nn.Sequential(nn.Linear)
     def forward(self, x):
         x = self.fc1(x)
         x = F.relu(x)
         x = self.fc2(x)
         x = F.relu(x)
         x = self.fc3(x)
+        x = F.relu(x)
         return x
 
 """
@@ -57,6 +61,7 @@ class DQN_solver:
         self.gamma = gamma
         self.n_episodes = n_episodes
         self.eps_start = eps_start
+        self.epsilon = eps_start
         self.eps_end = eps_end
         self.eps_decay = eps_decay
         self.memory = deque(maxlen=100000)
@@ -65,7 +70,7 @@ class DQN_solver:
         self.alpha_decay = alpha_decay
         #Initialiseer model
         self.dqn = DQN()
-        self.criterion = torch.nn.MSELoss()
+        self.criterion = torch.nn.SmoothL1Loss()
         self.opt = torch.optim.Adam(self.dqn.parameters(), lr=0.01)
         self.batch_size = batch_size
         self.quiet = quiet
@@ -79,11 +84,12 @@ class DQN_solver:
         return torch.tensor(np.reshape(state, [1, 8]), dtype = torch.float32)
     
     def choose_action(self, state, epsilon):
-        epsilon = 1
         if np.random.random() < epsilon:
-            action = (random.choice([True, False]), random.choice([True, False]))
+            #action = (random.choice([True, False]), random.choice([True, False]))
+            action = random.choice(range(4))
             return action
         else:
+            #print('niet random')
             with torch.no_grad():
                 return torch.argmax(self.dqn(state)).numpy()
     
@@ -91,15 +97,15 @@ class DQN_solver:
         reward = torch.tensor(reward)
         self.memory.append((state, action, reward, next_state, done))
     
-    def replay(self, batch_size):
-        #Nog niet veranderd
+    def replay(self, batch_size = 64):
         y_batch, y_target_batch = [], []
         minibatch = random.sample(self.memory, min(len(self.memory), batch_size))
         for state, action, reward, next_state, done in minibatch:
             y = self.dqn(state)
             y_target = y.clone().detach()
             with torch.no_grad():
-                y_target[0][action] = reward if done else reward + self.gamma * torch.max(self.dqn(next_state)[0])
+                above = reward if done else reward + self.gamma * torch.max(self.dqn(next_state)[0])
+                y_target[0][action] = above
             y_batch.append(y[0])
             y_target_batch.append(y_target[0])
         
@@ -110,35 +116,67 @@ class DQN_solver:
         loss = self.criterion(y_batch, y_target_batch)
         loss.backward()
         self.opt.step()        
-        
-        # if self.epsilon > self.epsilon_min:
-        #     self.epsilon *= self.epsilon_decay
+        #if self.epsilon > self.eps_end:
+        #    self.epsilon *= self.eps_decay
 
     def run(self):
         scores = deque(maxlen=100)
-    
+        lijst = []
+        rewards = []
         for e in range(self.n_episodes):
+            #print(self.dqn.fc1.weight)
+            #print(f'weight is {self.dqn.layer[0].weight}')
+            print(e)
             #print(auto)
             auto = Car()
             state = self.preprocess_state(auto.State())
             #print(f"state is {state}")
             done = False
             i = 0
-            while not done:
+            rewards_one_run = []
+            x = []
+            y = []
+            while not done and i < 200:
+                #print((auto.x, auto.y))
+                x.append(auto.x)
+                y.append(auto.y)
+                #print(f'i is {i}')
                 if e%100 == 0 and not self.quiet:
                     pass #render
                 action = self.choose_action(state, self.get_epsilon(e))
                 #next_state, reward, done, _ = _ #self.env.step(action)
-                next_state, reward, done = auto.Next_state(action), auto.Reward(), auto.Done()
+                reward_before = auto.Reward()
+                next_state, done = auto.Next_state(action), auto.Done()
+                reward = auto.Reward()
                 next_state = self.preprocess_state(next_state)
                 self.remember(state, action, reward, next_state, done)
                 state = next_state
                 i += 1
-            print(i)
-            scores.append(i)
-        mean_score = np.mean(scores)
+                rewards_one_run.append(reward)
+            print(f'reward is {np.mean(rewards_one_run)}')
+            self.replay(self.batch_size)
+        #     plt.plot(x, y)
+        #     plt.show()
+        #     lijst.append(i)
+        #     #print(i)
+        #     scores.append(i)
+        #     rewards.append(rewards_one_run[-1])
+        # #plt.plot(range(len(scores)), scores)
+        # #plt.show()
+        # mean_score = np.mean(scores)
+        # mean_reward = np.mean(rewards)
+        # alle_rewards.append(mean_reward)
+        # print(f'mean score is {mean_score}')
+        # print(f'mean reward is {mean_reward}')
+        # print(alle_rewards)
+        # if len(alle_rewards) < 30:
+        #     self.replay(self.batch_size)
+        # else:
+        #     plt.plot(range(len(alle_rewards)), alle_rewards)
 
+
+alle_rewards = []
 agent = DQN_solver()
 agent.run()
-
+plt.plot()
 
