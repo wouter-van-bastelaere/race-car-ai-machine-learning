@@ -14,7 +14,7 @@ START_Y = 3
 def show_one_race():
     car = Car()
     env = track()
-    env.read_track("tracks.track1.txt")
+    env.read_track("tracks\\track1.txt")
 
     gen = 0
     max_itt = MAX_ITT
