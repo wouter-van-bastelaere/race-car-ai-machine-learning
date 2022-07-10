@@ -67,7 +67,7 @@ class image(object):#classe die immages bijhoud.
         rot_image = rot_image.subsurface(rot_rect).copy()
         return rot_image
 # a = track()
-# a.read_track("track1.txt")
+# a.read_track("tracks.track1.txt")
 # #print(a.matrix)
 # startscherm()
 # draw_board(a)
